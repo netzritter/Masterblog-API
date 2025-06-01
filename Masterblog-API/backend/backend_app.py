@@ -9,7 +9,6 @@ POSTS = [
     {"id": 2, "title": "Second post", "content": "This is the second post."},
 ]
 
-
 @app.route('/api/posts', methods=['GET'])
 def get_posts():
     return jsonify(POSTS)
@@ -43,6 +42,17 @@ def add_post():
     POSTS.append(new_post)
 
     return jsonify(new_post), 201
+
+@app.route('/api/posts/<int:post_id>', methods=['DELETE'])
+def delete_post(post_id):
+    for index, post in enumerate(POSTS):
+        if post["id"] == post_id:
+            del POSTS[index]
+            return jsonify({
+                "message": f"Post with id {post_id} has been deleted successfully."
+            }), 200
+
+    return jsonify({"error": f"Post with id {post_id} not found."}), 404
 
 
 if __name__ == '__main__':
