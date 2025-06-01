@@ -13,6 +13,7 @@ POSTS = [
 def get_posts():
     return jsonify(POSTS)
 
+
 @app.route('/api/posts', methods=['POST'])
 def add_post():
     data = request.get_json()
@@ -43,6 +44,7 @@ def add_post():
 
     return jsonify(new_post), 201
 
+
 @app.route('/api/posts/<int:post_id>', methods=['DELETE'])
 def delete_post(post_id):
     for index, post in enumerate(POSTS):
@@ -53,6 +55,7 @@ def delete_post(post_id):
             }), 200
 
     return jsonify({"error": f"Post with id {post_id} not found."}), 404
+
 
 @app.route('/api/posts/<int:post_id>', methods=['PUT'])
 def update_post(post_id):
@@ -70,6 +73,24 @@ def update_post(post_id):
             return jsonify(post), 200
 
     return jsonify({"error": f"Post with id {post_id} not found."}), 404
+
+
+@app.route('/api/posts/search', methods=['GET'])
+def search_posts():
+    title_query = request.args.get('title', '').lower()
+    content_query = request.args.get('content', '').lower()
+
+    matching_posts = []
+
+    for post in POSTS:
+        title_matches = title_query in post['title'].lower() if title_query else False
+        content_matches = content_query in post['content'].lower() if content_query else False
+
+        if title_matches or content_matches:
+            matching_posts.append(post)
+
+    return jsonify(matching_posts), 200
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5002, debug=True)
