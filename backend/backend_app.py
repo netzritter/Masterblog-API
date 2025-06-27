@@ -12,6 +12,14 @@ POSTS = [
 
 @app.route('/api/posts', methods=['GET'])
 def get_posts():
+    """
+    Retrieve all posts, with optional sorting by title or content.
+    Query parameters:
+        - sort: field to sort by (title or content)
+        - direction: sorting direction (asc or desc)
+    Returns:
+        JSON response with the list of posts and any flashed messages.
+    """
     sort_field = request.args.get('sort')
     direction = request.args.get('direction', 'asc')
     if sort_field not in ['title', 'content', None]:
@@ -22,12 +30,20 @@ def get_posts():
         return jsonify({"error": "Invalid direction", "flashes": get_flashed_messages(with_categories=True)}), 400
     posts = POSTS.copy()
     if sort_field:
-        posts.sort(key=lambda x: x[sort_field].lower(), reverse=direction=='desc')
+        posts.sort(key=lambda x: x[sort_field].lower(), reverse=direction == 'desc')
     return jsonify({"posts": posts, "flashes": get_flashed_messages(with_categories=True)}), 200
 
 
 @app.route('/api/posts', methods=['POST'])
 def add_post():
+    """
+    Add a new post.
+    Expects JSON body with:
+        - title: post title
+        - content: post content
+    Returns:
+        JSON response with the created post and any flashed messages.
+    """
     data = request.get_json()
     if not data:
         flash("Missing JSON body", "error")
@@ -50,6 +66,14 @@ def add_post():
 
 @app.route('/api/posts/<int:post_id>', methods=['PUT'])
 def update_post(post_id):
+    """
+    Update an existing post by its ID.
+    Expects JSON body with optional fields:
+        - title: updated title
+        - content: updated content
+    Returns:
+        JSON response with the updated post or an error message.
+    """
     data = request.get_json()
     if not data:
         flash("Missing JSON body", "error")
@@ -66,6 +90,11 @@ def update_post(post_id):
 
 @app.route('/api/posts/<int:post_id>', methods=['DELETE'])
 def delete_post(post_id):
+    """
+    Delete a post by its ID.
+    Returns:
+        JSON response indicating success or failure with any flashed messages.
+    """
     for index, post in enumerate(POSTS):
         if post["id"] == post_id:
             del POSTS[index]
@@ -77,6 +106,14 @@ def delete_post(post_id):
 
 @app.route('/api/posts/search', methods=['GET'])
 def search_posts():
+    """
+    Search posts by title or content using query parameters.
+    Query parameters:
+        - title: partial title to match
+        - content: partial content to match
+    Returns:
+        JSON response with matching posts and any flashed messages.
+    """
     title_query = request.args.get('title', '').lower()
     content_query = request.args.get('content', '').lower()
     matches = [post for post in POSTS if title_query in post['title'].lower() or content_query in post['content'].lower()]
